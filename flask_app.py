@@ -1,10 +1,14 @@
-from flask import Flask
+from flask import Flask, render_template
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return "Welcome to your project workspace!"
+    return render_template('index.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
