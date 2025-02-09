@@ -3,25 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bob Project Dashboard</title>
+    <title>Bob's Project Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <header>
-        <h1>Bob Project Dashboard</h1>
+        <h1>Bob's Project Dashboard</h1>
     </header>
     <main>
         <div class="content">
-            <h2>Manage Tasks with Claude</h2>
-            <form id="apiForm">
+            <h2>Chat with Claude</h2>
+            <form id="apiForm" method="post">
                 <label for="prompt">Enter a prompt:</label>
                 <textarea id="prompt" name="prompt" rows="4" placeholder="Type your prompt here..."></textarea>
                 <button type="submit">Submit to Claude</button>
             </form>
             <div id="response">
-                <!-- Claude's API response will be displayed here -->
+                <!-- Claude's response will appear here -->
             </div>
         </div>
     </main>
+
+    <script>
+        const form = document.getElementById("apiForm");
+        const responseDiv = document.getElementById("response");
+        const textarea = document.getElementById("prompt");
+
+        // Handle Enter key press
+        textarea.addEventListener("keydown", function(event) {
+            if (event.key === "Enter" && !event.shiftKey && !event.ctrlKey) {
+                event.preventDefault();
+                form.requestSubmit();
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            try {
+                const response = await fetch("/generate", {
+                    method: "POST",
+                    body: formData,
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    responseDiv.innerHTML = `<p><strong>Claude's Response:</strong> ${data.response}</p>`;
+                } else {
+                    responseDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `<p style="color: red;">An unexpected error occurred.</p>`;
+            }
+        });
+    </script>
 </body>
 </html>
