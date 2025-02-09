@@ -3,54 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bob Project Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Bob's Project Dashboard</title>
     <style>
-        /* Layout Styles */
-        .main-container {
-            display: flex;
-            height: calc(100vh - 60px); /* Adjust for the header height */
-            overflow: hidden;
+        /* Your existing CSS styles here */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
         }
 
-        .chat-sidebar {
-            width: 250px;
-            background: #f5f5f5;
-            border-right: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
+        header {
+            background: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
         }
 
-        .sidebar-header {
-            padding: 15px;
+        .workspace-controls {
+            padding: 10px 20px;
+            background: #fff;
             border-bottom: 1px solid #ddd;
             display: flex;
-            justify-content: space-between;
+            gap: 10px;
             align-items: center;
         }
 
-        .chat-list {
-            overflow-y: auto;
+        .workspace-controls select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
             flex-grow: 1;
+            max-width: 200px;
         }
 
-        .chat-item {
-            padding: 10px 15px;
-            border-bottom: 1px solid #eee;
+        .workspace-controls button {
+            padding: 8px 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
         }
 
-        .chat-item:hover {
-            background: #eee;
+        .workspace-controls button:hover {
+            background: #218838;
         }
 
-        .chat-main {
+        .main-container {
+            display: flex;
+            height: calc(100vh - 120px);
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .instructions-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .instructions-section h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .instructions-section textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .chat-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            overflow-y: auto;
         }
 
         .chat-messages {
@@ -60,152 +104,296 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             background-color: #f8f9fa;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
-        .chat-input-form {
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .user-message {
+            background: #e3f2fd;
+        }
+
+        .assistant-message {
+            background: #f5f5f5;
+        }
+
+        .chat-input {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        textarea {
-            resize: none;
+        .chat-input textarea {
+            width: 100%;
             height: 80px;
             padding: 10px;
-            font-size: 1rem;
-        }
-
-        button {
-            padding: 10px 15px;
-            font-size: 1rem;
-            background-color: #28a745;
-            color: white;
-            border: none;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            resize: none;
+            font-size: 14px;
         }
 
-        button:hover {
-            background-color: #218838;
-        }
-
-        .clear-button {
-            padding: 5px 10px;
-            font-size: 0.9rem;
-            background-color: #dc3545;
+        .chat-input button {
+            padding: 10px;
+            background: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
 
-        .clear-button:hover {
-            background-color: #c82333;
+        .chat-input button:hover {
+            background: #0056b3;
         }
 
-        .user-message {
-            background: #e3f2fd;
-            margin-bottom: 10px;
-            padding: 10px;
+        .chat-history {
+            width: 250px;
+            background: white;
+            padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .assistant-message {
-            background: #f5f5f5;
-            margin-bottom: 10px;
+        .chat-history h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .chat-item {
             padding: 10px;
-            border-radius: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .chat-item:hover {
+            background: #f8f9fa;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Bob Project Dashboard</h1>
+        <h1>Bob's Project Dashboard</h1>
     </header>
-    <div class="main-container">
-        <!-- Left Sidebar -->
-        <aside class="chat-sidebar">
-            <div class="sidebar-header">
-                <h3>Chat History</h3>
-                <button id="clearHistory" class="clear-button">Clear All</button>
-            </div>
-            <div class="chat-list">
-                {% for chat in chat_history %}
-                <div class="chat-item">
-                    <p class="chat-preview">{{ chat.prompt[:50] }}...</p>
-                </div>
-                {% endfor %}
-            </div>
-        </aside>
 
-        <!-- Chat Main Section -->
-        <main class="chat-main">
-            <h2>Chat with Claude</h2>
-            <div class="chat-messages">
-                {% for chat in chat_history %}
-                <div class="message user-message">
-                    <p><strong>You:</strong> {{ chat.prompt }}</p>
+    <div class="workspace-controls">
+        <select id="workspaceSelect">
+            {% for workspace in workspaces %}
+            <option value="{{ workspace.id }}" {% if workspace.id == current_workspace_id %}selected{% endif %}>
+                {{ workspace.name }}
+            </option>
+            {% endfor %}
+        </select>
+        <button id="newWorkspace">New Workspace</button>
+    </div>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="instructions-section">
+                <h2>Workspace Instructions</h2>
+                <textarea id="workspaceInstructions" placeholder="Enter workspace-specific instructions here...">{{ workspace.instructions if workspace else '' }}</textarea>
+                <button class="btn btn-primary" onclick="saveInstructions()">Save Instructions</button>
+            </div>
+
+            <div class="chat-section">
+                <div class="chat-messages" id="chatMessages">
+                    {% for chat in chats %}
+                    <div class="message user-message">
+                        <strong>You:</strong> {{ chat.prompt }}
+                    </div>
+                    <div class="message assistant-message">
+                        <strong>Claude:</strong> {{ chat.response }}
+                    </div>
+                    {% endfor %}
                 </div>
-                <div class="message assistant-message">
-                    <p><strong>Claude:</strong> {{ chat.response }}</p>
+                <form id="chatForm" class="chat-input">
+                    <textarea 
+                        id="prompt" 
+                        name="prompt" 
+                        placeholder="Type your message here..."
+                        required></textarea>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="chat-history">
+            <h3>Chat History</h3>
+            <button id="clearHistory" class="btn btn-danger" style="margin-bottom: 15px;">Clear History</button>
+            <div id="chatList">
+                {% for chat in chats %}
+                <div class="chat-item">
+                    {{ chat.prompt[:50] }}...
                 </div>
                 {% endfor %}
             </div>
-            <form id="apiForm" method="post" class="chat-input-form">
-                <textarea id="prompt" name="prompt" placeholder="Type your prompt here..."></textarea>
-                <button type="submit">Submit to Claude</button>
-            </form>
-        </main>
+        </div>
     </div>
 
     <script>
-        const form = document.getElementById("apiForm");
-        const textarea = document.getElementById("prompt");
+        // Save Instructions
+        async function saveInstructions() {
+            const instructions = document.getElementById('workspaceInstructions').value;
+            const workspaceId = document.getElementById('workspaceSelect').value;
 
-        // Handle Enter key press
-        textarea.addEventListener("keydown", function(event) {
-            if (event.key === "Enter" && !event.shiftKey && !event.ctrlKey) {
-                event.preventDefault(); // Prevent making a new line
-                form.requestSubmit();
-            }
-        });
-
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
-
-            const formData = new FormData(form);
             try {
-                const response = await fetch("/generate", {
-                    method: "POST",
-                    body: formData
+                const response = await fetch(`/workspace/${workspaceId}/instructions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `instructions=${encodeURIComponent(instructions)}`
                 });
-                const data = await response.json();
 
                 if (response.ok) {
-                    location.reload(); // Reload page to show updated chat history
+                    alert('Instructions saved successfully!');
                 } else {
-                    const responseDiv = document.getElementById("response");
-                    responseDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                    alert('Failed to save instructions.');
                 }
             } catch (error) {
-                console.error("An unexpected error occurred:", error);
+                console.error('Error saving instructions:', error);
+                alert('Failed to save instructions.');
+            }
+        }
+
+   // Handle chat form submission (with Enter key)
+document.getElementById('prompt').addEventListener('keydown', async function (event) {
+// Check if Enter is pressed without Shift
+if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault(); // Prevent adding a new line
+    const prompt = this.value.trim(); // Get the input value
+    if (!prompt) return; // Don't submit if empty
+    
+    const formData = new FormData();
+    formData.append('prompt', prompt);
+
+    // Clear input field
+    this.value = '';
+
+    // Send message
+    try {
+        const response = await fetch('/generate', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Add messages to chat window directly
+            const chatMessages = document.querySelector('.chat-messages');
+
+            // Add user message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'message user-message';
+            userDiv.innerHTML = `<strong>You:</strong> ${data.prompt}`;
+            chatMessages.appendChild(userDiv);
+
+            // Add Claude's response
+            const claudeDiv = document.createElement('div');
+            claudeDiv.className = 'message assistant-message';
+            claudeDiv.innerHTML = `<strong>Claude:</strong> ${data.response}`;
+            chatMessages.appendChild(claudeDiv);
+
+            // Scroll to the bottom of messages
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Update chat history list
+            const chatList = document.getElementById('chatList');
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item';
+            chatItem.textContent = `${data.prompt.substring(0, 50)}...`;
+            chatList.insertBefore(chatItem, chatList.firstChild);
+        } else {
+            alert(data.error || 'Failed to send message.');
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Failed to send message.');
+    }
+}
+});
+
+        // Handle workspace switching
+        document.getElementById('workspaceSelect').addEventListener('change', async function(e) {
+            const workspaceId = this.value;
+            try {
+                await fetch('/workspace/switch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `workspace_id=${workspaceId}`
+                });
+                location.reload();
+            } catch (error) {
+                console.error('Error switching workspace:', error);
             }
         });
 
-        // Clear chat history
-        const clearHistoryButton = document.getElementById("clearHistory");
-        if (clearHistoryButton) {
-            clearHistoryButton.addEventListener("click", async () => {
+        // Handle new workspace creation
+        document.getElementById('newWorkspace').addEventListener('click', async function() {
+            const name = prompt('Enter workspace name:');
+            if (name) {
                 try {
-                    await fetch("/clear", { method: "POST" });
-                    location.reload(); // Refresh the page after clearing history
+                    await fetch('/workspace/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `name=${encodeURIComponent(name)}`
+                    });
+                    location.reload();
                 } catch (error) {
-                    alert("Failed to clear chat history.");
+                    console.error('Error creating workspace:', error);
                 }
-            });
-        }
+            }
+        });
+
+        // Handle chat history clearing
+        document.getElementById('clearHistory').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to clear all chats in this workspace?')) {
+                try {
+                    await fetch('/clear', { method: 'POST' });
+                    location.reload();
+                } catch (error) {
+                    alert('Failed to clear chat history.');
+                }
+            }
+        });
+
+        // Note: Enter key binding has been removed for message sending
+        // Users must click the Send Message button
     </script>
 </body>
 </html>
