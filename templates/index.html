@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bob's Project Dashboard</title>
     <style>
-        /* Your existing CSS styles here */
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -61,30 +60,6 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-        }
-
-        .instructions-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .instructions-section h2 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .instructions-section textarea {
-            width: 100%;
-            min-height: 100px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            resize: vertical;
         }
 
         .chat-section {
@@ -214,17 +189,12 @@
             </option>
             {% endfor %}
         </select>
-        <button id="newWorkspace">New Workspace</button>
+        <button id="newWorkspace" class="btn btn-primary">New Workspace</button>
+        <button id="instructionsBtn" class="btn btn-success">Set Instructions</button>
     </div>
 
     <div class="main-container">
         <div class="left-panel">
-            <div class="instructions-section">
-                <h2>Workspace Instructions</h2>
-                <textarea id="workspaceInstructions" placeholder="Enter workspace-specific instructions here...">{{ workspace.instructions if workspace else '' }}</textarea>
-                <button class="btn btn-primary" onclick="saveInstructions()">Save Instructions</button>
-            </div>
-
             <div class="chat-section">
                 <div class="chat-messages" id="chatMessages">
                     {% for chat in chats %}
@@ -237,9 +207,9 @@
                     {% endfor %}
                 </div>
                 <form id="chatForm" class="chat-input">
-                    <textarea 
-                        id="prompt" 
-                        name="prompt" 
+                    <textarea
+                        id="prompt"
+                        name="prompt"
                         placeholder="Type your message here..."
                         required></textarea>
                     <button type="submit" class="btn btn-primary">Send Message</button>
@@ -249,7 +219,9 @@
 
         <div class="chat-history">
             <h3>Chat History</h3>
-            <button id="clearHistory" class="btn btn-danger" style="margin-bottom: 15px;">Clear History</button>
+            <button id="newChatBtn" class="btn btn-primary" style="margin-bottom: 15px;">
+                New Chat
+            </button>
             <div id="chatList">
                 {% for chat in chats %}
                 <div class="chat-item">
@@ -261,88 +233,55 @@
     </div>
 
     <script>
-        // Save Instructions
-        async function saveInstructions() {
-            const instructions = document.getElementById('workspaceInstructions').value;
-            const workspaceId = document.getElementById('workspaceSelect').value;
+        // Handle chat form submission
+        document.getElementById('prompt').addEventListener('keydown', async function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                const prompt = this.value.trim();
+                if (!prompt) return;
 
-            try {
-                const response = await fetch(`/workspace/${workspaceId}/instructions`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `instructions=${encodeURIComponent(instructions)}`
-                });
+                const formData = new FormData();
+                formData.append('prompt', prompt);
 
-                if (response.ok) {
-                    alert('Instructions saved successfully!');
-                } else {
-                    alert('Failed to save instructions.');
+                this.value = '';
+
+                try {
+                    const response = await fetch('/generate', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        const chatMessages = document.querySelector('.chat-messages');
+
+                        const userDiv = document.createElement('div');
+                        userDiv.className = 'message user-message';
+                        userDiv.innerHTML = `<strong>You:</strong> ${data.prompt}`;
+                        chatMessages.appendChild(userDiv);
+
+                        const claudeDiv = document.createElement('div');
+                        claudeDiv.className = 'message assistant-message';
+                        claudeDiv.innerHTML = `<strong>Claude:</strong> ${data.response}`;
+                        chatMessages.appendChild(claudeDiv);
+
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                        const chatList = document.getElementById('chatList');
+                        const chatItem = document.createElement('div');
+                        chatItem.className = 'chat-item';
+                        chatItem.textContent = `${data.prompt.substring(0, 50)}...`;
+                        chatList.insertBefore(chatItem, chatList.firstChild);
+                    } else {
+                        alert(data.error || 'Failed to send message.');
+                    }
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    alert('Failed to send message.');
                 }
-            } catch (error) {
-                console.error('Error saving instructions:', error);
-                alert('Failed to save instructions.');
             }
-        }
-
-   // Handle chat form submission (with Enter key)
-document.getElementById('prompt').addEventListener('keydown', async function (event) {
-// Check if Enter is pressed without Shift
-if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault(); // Prevent adding a new line
-    const prompt = this.value.trim(); // Get the input value
-    if (!prompt) return; // Don't submit if empty
-    
-    const formData = new FormData();
-    formData.append('prompt', prompt);
-
-    // Clear input field
-    this.value = '';
-
-    // Send message
-    try {
-        const response = await fetch('/generate', {
-            method: 'POST',
-            body: formData
         });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            // Add messages to chat window directly
-            const chatMessages = document.querySelector('.chat-messages');
-
-            // Add user message
-            const userDiv = document.createElement('div');
-            userDiv.className = 'message user-message';
-            userDiv.innerHTML = `<strong>You:</strong> ${data.prompt}`;
-            chatMessages.appendChild(userDiv);
-
-            // Add Claude's response
-            const claudeDiv = document.createElement('div');
-            claudeDiv.className = 'message assistant-message';
-            claudeDiv.innerHTML = `<strong>Claude:</strong> ${data.response}`;
-            chatMessages.appendChild(claudeDiv);
-
-            // Scroll to the bottom of messages
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            // Update chat history list
-            const chatList = document.getElementById('chatList');
-            const chatItem = document.createElement('div');
-            chatItem.className = 'chat-item';
-            chatItem.textContent = `${data.prompt.substring(0, 50)}...`;
-            chatList.insertBefore(chatItem, chatList.firstChild);
-        } else {
-            alert(data.error || 'Failed to send message.');
-        }
-    } catch (error) {
-        console.error('Error sending message:', error);
-        alert('Failed to send message.');
-    }
-}
-});
 
         // Handle workspace switching
         document.getElementById('workspaceSelect').addEventListener('change', async function(e) {
@@ -380,20 +319,37 @@ if (event.key === 'Enter' && !event.shiftKey) {
             }
         });
 
-        // Handle chat history clearing
-        document.getElementById('clearHistory').addEventListener('click', async () => {
-            if (confirm('Are you sure you want to clear all chats in this workspace?')) {
-                try {
-                    await fetch('/clear', { method: 'POST' });
-                    location.reload();
-                } catch (error) {
-                    alert('Failed to clear chat history.');
-                }
+        // Handle new chat button
+        document.getElementById('newChatBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/clear', { method: 'POST' });
+                location.reload();
+            } catch (error) {
+                console.error('Error starting a new chat:', error);
+                alert('Failed to start a new chat.');
             }
         });
 
-        // Note: Enter key binding has been removed for message sending
-        // Users must click the Send Message button
+        // Handle instructions button
+        document.getElementById('instructionsBtn').addEventListener('click', async function() {
+            const workspace_id = document.getElementById('workspaceSelect').value;
+            const instructions = prompt('Enter workspace instructions:');
+            if (instructions) {
+                try {
+                    await fetch(`/workspace/${workspace_id}/instructions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `instructions=${encodeURIComponent(instructions)}`
+                    });
+                    alert('Instructions updated successfully!');
+                } catch (error) {
+                    console.error('Error updating instructions:', error);
+                    alert('Failed to update instructions.');
+                }
+            }
+        });
     </script>
 </body>
 </html>

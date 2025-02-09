@@ -1,1 +1,12 @@
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+
+# Ignore flask session files
+flask_session/
+
+# Ignore SQLite database
+instance/*.db
+
+# Ignore sensitive environment variables
 .env
