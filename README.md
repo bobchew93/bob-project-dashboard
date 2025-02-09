@@ -1,4 +1,4 @@
-# Bob Project Dashboard
+# Bob's Project Dashboard
 
 A Flask-based project dashboard for managing copywriting tasks and voice cloning using Claude AI.
 
